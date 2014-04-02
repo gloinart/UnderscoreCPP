@@ -64,7 +64,7 @@ void run_underscore_test() {
     TEST( array.data() , array | _.first | _.adressof );
     TEST( array | _.begin | *_ , array | _.begin | _.deref );
     TEST( array | _.front | _.adressof , array | _.front | &_ );
-    TEST( vector | _.pushed_back(8) | _.back() , 8 );  
+    TEST( vector | _.push_back(8) | _.back() , 8 );  
     TEST( 7 | _.is_any_of(1,2,3,4), false);
     TEST( 7 | _.is_any_of(1,2,7,4), true);
   }
@@ -82,12 +82,12 @@ void run_underscore_test() {
   // algorithms
   {
     TEST( array | _.equal(vector), true);
-    TEST( array | _.replaced(4, 8) , _.array(8,3,8,5,6,7) );
+    TEST( array | _.replace(4, 8) , _.array(8,3,8,5,6,7) );
     TEST( array | _.for_each([](int& val){val*=2;}) , _.array(8,6,8,10,12,14) );
     TEST( array | _.accumulate , std::accumulate(array.begin(), array.end(), 0) );
-    TEST( array | _.sorted | _.is_sorted, true );
+    TEST( array | _.sort | _.is_sorted, true );
     TEST( array | _.rotated(3) , _.array(5,6,7,4,3,4) );
-    TEST( array | _.sorted | _.random_shuffled | _.is_sorted , false );
+    TEST( array | _.sort | _.random_shuffle | _.is_sorted , false );
     TEST( array | _.count_if([](int val) {return true;}) , array | _.size );
     TEST( array | _.count(4) , 2 );
   }
@@ -140,17 +140,17 @@ void run_underscore_test() {
   {
     auto v = vector;
     auto adr = v | _.front | _.adressof;
-    auto sorted = v | _.move | _.sorted;
+    auto sort = v | _.move | _.sort;
     TEST( v | _.empty , true  );
-    TEST( sorted | _.empty , false  );
-    TEST( sorted | _.front | _.adressof , adr );
+    TEST( sort | _.empty , false  );
+    TEST( sort | _.front | _.adressof , adr );
   }
   
   // Mutate container
   {
     auto v = vector;
     TEST( v | _.is_sorted , false );
-    v | _.mutate  | _.random_shuffled |  _.sorted | _.popped_back;
+    v | _.mutate  | _.random_shuffle |  _.sort | _.pop_back;
     TEST( v | _.is_sorted , true );
     TEST( v | _.size , vector.size() - 1);
   }
@@ -162,21 +162,21 @@ void run_underscore_test() {
     TEST( 1.49 | _.round, 1.0);
   }
   
-  // transformed
+  // transform
   {
-    std::vector<float> vec_transformed;
+    std::vector<float> vec_transform;
     for(const auto& val: vector)
-      vec_transformed.push_back(val*val | _.to<float>());
+      vec_transform.push_back(val*val | _.to<float>());
     auto functor = [](int x) -> float { return (float)(x*x); };
-    // transformed
-    TEST(vector | _.transformed(functor), vec_transformed);
-    // transformed_to
+    // transform
+    TEST(vector | _.transform(functor), vec_transform);
+    // transform_to
     std::vector<float> vvvv(8);
-    auto t = UnderscoreTags::TransformedToTag();
+    auto t = UnderscoreTags::TransformToTag();
     auto t2arg = t(functor, vvvv);
-    TEST(array | t2arg, vec_transformed);
-    //TEST(array | _.transformed_to( functor, vvvv ), vec_transformed );
-    //TEST(array | _.transformed_to( functor, std::vector<float>() ), vec_transformed );
+    TEST(array | t2arg, vec_transform);
+    //TEST(array | _.transform_to( functor, vvvv ), vec_transform );
+    //TEST(array | _.transform_to( functor, std::vector<float>() ), vec_transform );
   }
   
   // String handling
@@ -261,11 +261,11 @@ void run_underscore_test() {
   LOGV(x);
   LOGV(y);
   auto arr = array;
-  auto z = arr | _.mutate | _.sorted | _.min_element;
+  auto z = arr | _.mutate | _.sort | _.min_element;
   LOG(*z);
   
   auto v = vector;
-  //auto w = vector | _.transformed([](int x){ return (float)(x*x); });
+  //auto w = vector | _.transform([](int x){ return (float)(x*x); });
 
   
   // views
@@ -274,7 +274,7 @@ void run_underscore_test() {
     // Conditional
     auto Filter = [](int val) { return val > 3; };
     //TEST( array | utl::filter_view([](int val) { return val > 3; })  | _.to_vector, _.array(4,4,5,6,7) | _.to_vector);
-    //TEST( array | _.to_vector | utl::filter_view([](int val) { return val > 3; }) | _.filled(9) | _.to_vector, _.array(9,9,9,9,9) | _.to_vector);
+    //TEST( array | _.to_vector | utl::filter_view([](int val) { return val > 3; }) | _.fill(9) | _.to_vector, _.array(9,9,9,9,9) | _.to_vector);
     
     TEST (
       array 
@@ -286,7 +286,7 @@ void run_underscore_test() {
     
     // Subview
     TEST( array | utl::sub_view(1) | _.to_deque , _.array(3,4,5,6,7) | _.to_deque );
-    TEST( vector | _.mutate | utl::sub_view(1) | _.filled(1) | _.to_deque , _.array(1,1,1,1,1) | _.to_deque );
+    TEST( vector | _.mutate | utl::sub_view(1) | _.fill(1) | _.to_deque , _.array(1,1,1,1,1) | _.to_deque );
     //TEST( array | utl::sub_view(1) | utl::sub_view(1) | _.to_deque , _.array(4,5,6,7) | _.to_deque );
     //TEST( array | utl::sub_view(2, 3) | _.to_list , _.array(4,5,6) | _.to_list );
   }
