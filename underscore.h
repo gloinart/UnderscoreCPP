@@ -2314,11 +2314,11 @@ CREATE_TAG_1_ARG(TokenizeStringTag);
 template <typename ContainerType, typename ArgType0>
 std::vector<ContainerType>
 PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::TokenizeStringTag1Arg<ArgType0>& tag) {
-  std::vector<ContainerType> tokens;
-  tokens.reserve(16);
-  const auto& container_begin = std::begin(container);
-  const auto& container_end = std::end(container);
-  const auto& delimiters = tag.arg0;
+	std::vector<ContainerType> tokens;
+	tokens.reserve(16);
+	const auto& container_begin = std::begin(container);
+	const auto& container_end = std::end(container);
+	const auto& delimiters = tag.arg0;
 	const auto& delimiters_begin = std::begin(delimiters);
 	const auto& delimiters_end = std::find(delimiters_begin, std::end(delimiters), 0); // Find null, to be compatible with char literals
   for(auto left = UnderscoreDetail::find_first_not_of(container_begin, container_end, delimiters_begin, delimiters_end);

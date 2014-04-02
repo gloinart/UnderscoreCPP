@@ -1,0 +1,4 @@
+all: *.*
+
+%: %.cpp
+	g++ -std=c++11 $< -o $@ -Wfatal-errors
