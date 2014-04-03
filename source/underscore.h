@@ -197,6 +197,7 @@ namespace UnderscoreDetail {
   struct TAG_NAME##1Arg { \
     TAG_NAME##1Arg(const ArgType0& arg0) \
     : arg0(arg0) {} \
+		TAG_NAME##1Arg& operator=(const TAG_NAME##1Arg&); \
     const ArgType0& arg0; \
   };
 #define IMPLEMENTS_2_ARG_TAG(TAG_NAME) \
@@ -204,6 +205,7 @@ namespace UnderscoreDetail {
   struct TAG_NAME##2Arg { \
     TAG_NAME##2Arg(const ArgType0& arg0, const ArgType1& arg1) \
     : arg0(arg0), arg1(arg1) {} \
+		TAG_NAME##2Arg& operator=(const TAG_NAME##2Arg&); \
     const ArgType0& arg0; \
     const ArgType1& arg1; \
   };
@@ -212,6 +214,7 @@ namespace UnderscoreDetail {
   struct TAG_NAME##3Arg { \
     TAG_NAME##3Arg(const ArgType0& arg0, const ArgType1& arg1, const ArgType2& arg2) \
     : arg0(arg0), arg1(arg1), arg2(arg2) {} \
+		TAG_NAME##3Arg& operator=(const TAG_NAME##3Arg&); \
     const ArgType0& arg0; \
     const ArgType1& arg1; \
     const ArgType2& arg2; \
@@ -221,6 +224,7 @@ namespace UnderscoreDetail {
   struct TAG_NAME##4Arg { \
     TAG_NAME##4Arg(const ArgType0& arg0, const ArgType1& arg1, const ArgType2& arg2, const ArgType3& arg3) \
     : arg0(arg0), arg1(arg1), arg2(arg2), arg3(arg3) {} \
+		TAG_NAME##4Arg& operator=(const TAG_NAME##4Arg&); \
     const ArgType0& arg0; \
     const ArgType1& arg1; \
     const ArgType2& arg2; \
@@ -231,6 +235,7 @@ namespace UnderscoreDetail {
   struct TAG_NAME##2Arg { \
     TAG_NAME##2Arg(const ArgType& arg0, const ArgType& arg1) \
     : arg0(arg0), arg1(arg1) {} \
+		TAG_NAME##2Arg& operator=(const TAG_NAME##2Arg&); \
     const ArgType& arg0; \
     const ArgType& arg1; \
   };
@@ -239,6 +244,7 @@ namespace UnderscoreDetail {
   struct TAG_NAME##3Arg { \
     TAG_NAME##3Arg(const ArgType& arg0, const ArgType& arg1, const ArgType& arg2) \
     : arg0(arg0), arg1(arg1), arg2(arg2) {} \
+		TAG_NAME##3Arg& operator=(const TAG_NAME##3Arg&); \
     const ArgType& arg0; \
     const ArgType& arg1; \
     const ArgType& arg2; \
@@ -248,6 +254,7 @@ namespace UnderscoreDetail {
   struct TAG_NAME##4Arg { \
     TAG_NAME##4Arg(const ArgType& arg0, const ArgType& arg1, const ArgType& arg2, const ArgType& arg3) \
     : arg0(arg0), arg1(arg1), arg2(arg2), arg3(arg3) {} \
+		TAG_NAME##4Arg &operator=(const TAG_NAME##4Arg&); \
     const ArgType& arg0; \
     const ArgType& arg1; \
     const ArgType& arg2; \
@@ -305,6 +312,7 @@ namespace UnderscoreDetail {
   namespace UnderscoreTags { \
   struct TAG_NAME { \
     TAG_NAME() {} \
+		TAG_NAME& operator=(const TAG_NAME&); \
     const TAG_NAME operator()() const { return TAG_NAME();} \
   };}
 #define CREATE_TAG_1_ARG( TAG_NAME ) \
@@ -312,6 +320,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_1_ARG_TAG( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_1_ARG_OPERATOR( TAG_NAME ) \
   };}
 #define CREATE_TAG_0_1_ARG( TAG_NAME ) \
@@ -319,6 +328,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_1_ARG_TAG( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     const TAG_NAME operator()() const { return TAG_NAME();} \
     IMPLEMENTS_1_ARG_OPERATOR( TAG_NAME ) \
   };}
@@ -327,6 +337,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_2_ARG_TAG( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_2_ARG_OPERATOR( TAG_NAME ) \
   };}
 #define CREATE_TAG_0_1_2_ARG( TAG_NAME ) \
@@ -335,6 +346,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_2_ARG_TAG( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_1_ARG_OPERATOR( TAG_NAME ) \
     IMPLEMENTS_2_ARG_OPERATOR( TAG_NAME ) \
   };}
@@ -343,6 +355,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_3_ARG_TAG( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_3_ARG_OPERATOR( TAG_NAME ) \
   };}
 #define CREATE_TAG_4_ARG( TAG_NAME ) \
@@ -350,6 +363,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_4_ARG_TAG( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_4_ARG_OPERATOR( TAG_NAME ) \
   };}
 #define CREATE_TAG_0_1_2_ARG_SAME_TYPE( TAG_NAME ) \
@@ -366,6 +380,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_2_ARG_TAG_SAME_TYPE( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_2_ARG_OPERATOR_SAME_TYPE( TAG_NAME ) \
   };}
 #define CREATE_TAG_3_ARG_SAME_TYPE( TAG_NAME ) \
@@ -373,6 +388,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_3_ARG_TAG_SAME_TYPE( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_3_ARG_OPERATOR_SAME_TYPE( TAG_NAME ) \
   }}
 #define CREATE_TAG_4_ARG_SAME_TYPE( TAG_NAME ) \
@@ -380,6 +396,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_4_ARG_TAG_SAME_TYPE( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_4_ARG_OPERATOR_SAME_TYPE( TAG_NAME ) \
   };}
 #define CREATE_TAG_1_2_3_4_ARG_SAME_TYPE( TAG_NAME ) \
@@ -390,6 +407,7 @@ namespace UnderscoreDetail {
   IMPLEMENTS_4_ARG_TAG_SAME_TYPE( TAG_NAME ) \
   struct TAG_NAME { \
     TAG_NAME() {}\
+		TAG_NAME& operator=(const TAG_NAME&); \
     IMPLEMENTS_1_ARG_OPERATOR( TAG_NAME ) \
     IMPLEMENTS_2_ARG_OPERATOR_SAME_TYPE( TAG_NAME ) \
     IMPLEMENTS_3_ARG_OPERATOR_SAME_TYPE( TAG_NAME ) \
@@ -407,7 +425,7 @@ namespace UnderscoreDetail {
   CREATE_TAG_0_ARG(TAG_NAME ) \
   template <typename ValueType> \
   ValueType \
-  PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::TAG_NAME& tag) { \
+  PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::TAG_NAME&) { \
     return FUNCTION(value); \
   }
 #define CREATE_PIPE_1_ARG(TAG_NAME, FUNCTION) \
@@ -598,13 +616,13 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::CountIfTag1A
 CREATE_TAG_0_ARG( EndTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_iterator
-PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::EndTag& tag) {
+PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::EndTag&) {
   UNDERSCORE_STATIC_ASSERT(std::is_rvalue_reference<ContainerType>::value == false, "");
   return std::end(container);
 }
 template <typename ContainerType> // mutable
 typename ContainerType::iterator
-PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::EndTag& tag) {
+PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::EndTag&) {
   UNDERSCORE_STATIC_ASSERT(std::is_rvalue_reference<ContainerType>::value == false, "");
   return std::end(container);
 }
@@ -735,7 +753,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ForEachTag1Arg<ArgT
 CREATE_TAG_0_ARG( FrontInserterTag );
 template <typename ContainerType>
 std::front_insert_iterator<ContainerType>
-PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FrontInserterTag& tag) {
+PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FrontInserterTag&) {
   UNDERSCORE_STATIC_ASSERT(std::is_rvalue_reference<ContainerType>::value == false, "");
   UNDERSCORE_STATIC_ASSERT(std::is_const<ContainerType>::value == false, "Underscore Library Error: Cannot create a std::front_inserter for a const container.");
   return std::front_inserter(container);
@@ -960,6 +978,7 @@ namespace UnderscoreTags {
   template <typename FunctorType>
   struct TransformTag1Arg {
     TransformTag1Arg(const FunctorType& arg0) : arg0(arg0) {}
+		TransformTag1Arg& operator=(const TransformTag1Arg& other);
     const FunctorType& arg0;
   };
   template <typename FunctorType, typename PreallocatedContainerType>
@@ -996,6 +1015,7 @@ namespace UnderscoreTags {
   template <typename FunctorType, typename PreallocatedContainerType>
   struct TransformToTag2Arg {
     TransformToTag2Arg(const FunctorType& arg0, PreallocatedContainerType& arg1) : arg0(arg0), arg1(arg1) {}
+		TransformToTag2Arg& operator=(const TransformToTag2Arg&);
     const FunctorType& arg0;
     PreallocatedContainerType& arg1;
   };
@@ -1530,14 +1550,14 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::PushFrontTag1Arg<Ar
 #define CREATE_MUTABLE_PIPE_IMPLEMENTATION_0ARG( TAG_NAME, STL_ALGORITHM_NAME ) \
   template <typename ContainerType> \
   ContainerType \
-  PIPE_OPERATOR(ContainerType container, const UnderscoreTags::TAG_NAME& tag) { \
+  PIPE_OPERATOR(ContainerType container, const UnderscoreTags::TAG_NAME&) { \
     STL_ALGORITHM_NAME(std::begin(container), std::end(container)); \
     return container; \
   }
 #define CREATE_MUTABLE_PIPE_IMPLEMENTATION_0_1_ARG( TAG_NAME, STL_ALGORITHM_NAME ) \
   template <typename ContainerType> \
   ContainerType \
-  PIPE_OPERATOR(ContainerType container, const UnderscoreTags::TAG_NAME& tag) { \
+  PIPE_OPERATOR(ContainerType container, const UnderscoreTags::TAG_NAME&) { \
     STL_ALGORITHM_NAME(std::begin(container), std::end(container)); \
     return container; \
   } \
@@ -2094,10 +2114,10 @@ PIPE_OPERATOR(MapType&& dictionary, UnderscoreTags::ValueOrDefaultTag2Arg<ArgTyp
 
 // type_name
 CREATE_TAG_0_ARG( TypeNameTag );
-template <typename T>
+template <typename ValueType>
 std::string
-PIPE_OPERATOR(const T* ptr, const UnderscoreTags::TypeNameTag&) {
-  return typeid(*ptr).name();
+PIPE_OPERATOR(const ValueType*, const UnderscoreTags::TypeNameTag&) {
+  return typeid(ValueType).name();
 }
 
 
@@ -2364,6 +2384,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ToUpperTag&) {
 
 struct Underscore {
   Underscore(){}
+	Underscore& operator=(const Underscore& other);
 
   // STL Tags for piping
   UnderscoreTags::AccumulateTag accumulate;
