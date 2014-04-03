@@ -52,6 +52,7 @@ Done:
 #include <vector>
 #include <list>
 #include <deque>
+#include <stdint.h>
 
 // Configuration
 #ifndef UNDERSCORE_ASSERT
@@ -1194,6 +1195,7 @@ CREATE_PIPE_0_ARG(CeilTag, ::ceil);
 CREATE_PIPE_0_ARG(TruncTag, ::trunc);
 CREATE_PIPE_0_ARG(ModfTag, ::modf);
 CREATE_PIPE_0_ARG(PowTag, ::pow);
+CREATE_PIPE_0_ARG(TanhTag, ::tanh);
 
 // round
 CREATE_TAG_0_ARG( RoundTag );
@@ -2300,7 +2302,7 @@ CREATE_TAG_0_ARG( WstrTag );
 template <typename ValueType>
 UnderscoreDetail::make_wstring
 operator<<(const UnderscoreTags::WstrTag&, const ValueType& value) {
-  UnderscoreDetail::make_string mstr;
+  UnderscoreDetail::make_wstring mstr;
   mstr << value;
   return mstr;
 }
