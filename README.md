@@ -17,7 +17,6 @@ Algorithms<br/>
   // vector is changed<br/>
   _[vector] | _.random_shuffle | _.sort | _.erase_all(3);<br/>
   <br/>
-Operator direct<br/>
 <br/>
 String handling<br/>
   std::string str = _.str << "Test" << std::vector<int>(3,3) << ":" << 7.8;<br/>
