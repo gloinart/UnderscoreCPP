@@ -3,6 +3,7 @@ UNDERSCORE_CPP by Viktor Sehr
 
 TODO:
 Important
+	serialize array
   mutable_container as rvalue!!
   Transform!
   is_container or more containers for pretty_print
@@ -27,10 +28,10 @@ Done:
 -- math tags
 -- pretty_print container
 -- return values of rvalue containers
--- contains_any_of/is_any_of
+-- is_any_of
 -- string functions (trim, replace_seq, to_lower, to_upper etc)
 -- replace string
--- rotated
+-- rotate
 -- checked_delete
 -- type_name
 
@@ -52,7 +53,7 @@ Done:
 #include <vector>
 #include <list>
 #include <deque>
-#include <stdint.h>
+#include <cstdint>
 
 // Configuration
 #ifndef UNDERSCORE_ASSERT
@@ -79,14 +80,16 @@ Done:
   source.clear();
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-/// Detail
-/////////////////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------
+// Detail
+//
 namespace UnderscoreDetail {
+
+	class rvalue_container {};
 
   // mutable_container_base
   template <typename ContainerType>
-  class mutable_container_base {
+  class mutable_container_base : public rvalue_container {
     typedef mutable_container_base<ContainerType> my_type;
   public:
     typedef typename ContainerType::const_iterator const_iterator;
@@ -95,13 +98,14 @@ namespace UnderscoreDetail {
     typedef typename ContainerType::reference reference;
     typedef typename ContainerType::const_reference const_reference;
     typedef typename ContainerType::size_type size_type;
+		
     mutable_container_base(ContainerType* container)
     : container_(container) {
-      static_assert(!std::is_const<ContainerType>::value, "Underscore Library Error: Cannot mutate a const container)");
+      static_assert(std::is_const<ContainerType>::value == false, "Underscore Library Error: Cannot mutate a const container)");
     }
     mutable_container_base(const mutable_container_base& other) 
     : container_(other.container_) 
-	{}
+		{}
     mutable_container_base& operator=(const mutable_container_base& other) {
       container_ = other.container_;
       return *this;
@@ -440,7 +444,7 @@ namespace UnderscoreDetail {
 
 
 
-// accumulate - stl
+/// accumulate - stl
 CREATE_TAG_0_1_2_ARG( AccumulateTag );
 template <typename ContainerType>
 typename ContainerType::value_type
@@ -458,7 +462,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::AccumulateTa
   return std::accumulate(std::begin(container), std::end(container), tag.arg0, tag.arg1);
 }
 
-// adressof - stl
+/// adressof - stl
 CREATE_TAG_0_ARG( AdressOfTag );
 template <typename ValueType>
 const ValueType*
@@ -473,7 +477,7 @@ PIPE_OPERATOR(ValueType& value, const UnderscoreTags::AdressOfTag&) {
   return std::addressof(value);
 }
 
-// all_of - stl
+/// all_of - stl
 CREATE_TAG_1_ARG( AllOfTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -481,7 +485,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::AllOfTag1Arg
   return std::all_of(std::begin(container), std::end(container), tag.arg0);
 }
 
-// all_of_equal - stl
+/// all_of_equal - stl
 CREATE_TAG_1_ARG( AllOfEqualTag );
 template <typename ContainerType, typename ArgType0>
 bool 
@@ -492,7 +496,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::AllOfEqualTa
   return true;
 }
 
-// any_of - stl
+/// any_of - stl
 CREATE_TAG_1_ARG( AnyOfTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -500,7 +504,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::AnyOfTag1Arg
   return std::any_of(std::begin(container), std::end(container), tag.arg0);
 }
 
-// any_of_equal - stl
+/// any_of_equal - stl
 CREATE_TAG_1_ARG( AnyOfEqualTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -509,7 +513,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::AnyOfEqualTa
   return std::find(std::begin(container), last, tag.arg0) != last;
 }
 
-// back_inserter - stl
+/// back_inserter - stl
 CREATE_TAG_0_ARG( BackInserterTag );
 template <typename ContainerType>
 typename std::back_insert_iterator<ContainerType>
@@ -519,7 +523,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::BackInserterTag&) 
   return std::back_inserter(container);
 }
 
-// begin - stl
+/// begin - stl
 CREATE_TAG_0_ARG( BeginTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_iterator
@@ -534,7 +538,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::BeginTag&) {
   return std::begin(container);
 }
 
-// binary_search - stl
+/// binary_search - stl
 CREATE_TAG_1_ARG( BinarySearchTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -542,7 +546,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::BinarySearch
   return std::binary_search(std::begin(container), std::end(container), tag.arg0);
 }
 
-// cbegin - stl
+/// cbegin - stl
 CREATE_TAG_0_ARG( CBeginTag );
 template <typename ContainerType>
 typename ContainerType::const_iterator
@@ -551,7 +555,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::CBeginTag&) 
   return std::begin(container);
 }
 
-// cend - stl
+/// cend - stl
 CREATE_TAG_0_ARG( CEndTag );
 template <typename ContainerType>
 typename ContainerType::const_iterator
@@ -560,7 +564,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::CEndTag&) {
   return std::end(container);
 }
 
-// rbegin - stl
+/// rbegin - stl
 CREATE_TAG_0_ARG( RbeginTag );
 template <typename ContainerType>
 typename ContainerType::const_iterator
@@ -569,7 +573,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::RbeginTag&) 
   return UNDERSCORE_RBEGIN(container);
 }
 
-// rend - stl
+/// rend - stl
 CREATE_TAG_0_ARG( RendTag );
 template <typename ContainerType>
 typename ContainerType::const_iterator
@@ -578,7 +582,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::RendTag&) {
   return UNDERSCORE_REND(container);
 }
 
-// crbegin - stl
+/// crbegin - stl
 CREATE_TAG_0_ARG( CrbeginTag );
 template <typename ContainerType>
 typename ContainerType::const_iterator
@@ -587,7 +591,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::CrbeginTag&)
   return UNDERSCORE_CRBEGIN(container);
 }
 
-// crend - stl
+/// crend - stl
 CREATE_TAG_0_ARG( CrendTag );
 template <typename ContainerType>
 typename ContainerType::const_iterator
@@ -596,7 +600,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::CrendTag&) {
   return UNDERSCORE_CREND(container);
 }
 
-// count - stl
+/// count - stl
 CREATE_TAG_1_ARG( CountTag );
 template <typename ContainerType, typename ArgType0>
 size_t
@@ -604,7 +608,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::CountTag1Arg
   return std::count(std::begin(container), std::end(container), tag.arg0);
 }
 
-// count_if - stl
+/// count_if - stl
 CREATE_TAG_1_ARG( CountIfTag );
 template <typename ContainerType, typename ArgType0>
 size_t
@@ -612,7 +616,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::CountIfTag1A
   return std::count_if(std::begin(container), std::end(container), tag.arg0);
 }
 
-// end - stl
+/// end - stl
 CREATE_TAG_0_ARG( EndTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_iterator
@@ -627,7 +631,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::EndTag&) {
   return std::end(container);
 }
 
-// equal
+/// equal
 CREATE_TAG_1_ARG( EqualTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -639,7 +643,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::EqualTag1Arg
   return std::equal(std::begin(container), std::end(container), std::begin(tag.arg0));
 }
 
-// find - stl
+/// find - stl
 CREATE_TAG_1_ARG( FindTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -684,7 +688,7 @@ PIPE_OPERATOR(std::unordered_set<ValueType>& container, const UnderscoreTags::Fi
   return container.find(tag.arg0);
 }
 
-// find_if - stl
+/// find_if - stl
 CREATE_TAG_1_ARG( FindIfTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -699,7 +703,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FindIfTag1Arg<ArgT
   return std::find_if(std::begin(container), std::end(container), tag.arg0);
 }
 
-// find_if_not - stl
+/// find_if_not - stl
 CREATE_TAG_0_1_ARG( FindIfNotTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -714,7 +718,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FindIfNotTag1Arg<A
   return std::find_if_not(std::begin(container), std::end(container), tag.arg0);
 }
 
-// find_index - underscore
+/// find_index - underscore
 CREATE_TAG_1_ARG( FindIndexTag );
 template <typename ContainerType, typename ArgType0>
 typename ContainerType::size_type
@@ -723,7 +727,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::FindIndexTag
   return std::distance(std::begin(container), pos);
 }
 
-// find_index_if - underscore
+/// find_index_if - underscore
 CREATE_TAG_1_ARG( FindIndexIfTag );
 template <typename ContainerType, typename ArgType0>
 typename ContainerType::size_type
@@ -731,7 +735,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::FindIndexIfT
   return std::distance(std::begin(container), std::find_if(std::begin(container), std::end(container), tag.arg0));
 }
 
-// find_index_if_not - underscore
+/// find_index_if_not - underscore
 CREATE_TAG_1_ARG( FindIndexIfNotTag );
 template <typename ContainerType, typename ArgType0>
 typename ContainerType::size_type
@@ -740,7 +744,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::FindIndexIfN
   return std::distance(std::begin(container), pos);
 }
 
-// for_each - stl
+/// for_each - stl
 CREATE_TAG_1_ARG( ForEachTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -749,7 +753,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ForEachTag1Arg<ArgT
   return container;
 }
 
-// front_inserter - stl
+/// front_inserter - stl
 CREATE_TAG_0_ARG( FrontInserterTag );
 template <typename ContainerType>
 std::front_insert_iterator<ContainerType>
@@ -759,7 +763,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FrontInserterTag&)
   return std::front_inserter(container);
 }
 
-// get - stl
+/// get - stl
 namespace UnderscoreTags { template <size_t TupleIndex> struct GetTag {}; }
 template <typename TupleType, size_t TupleIndex> // immutable
 const typename std::tuple_element<TupleIndex, TupleType>::type&
@@ -777,7 +781,7 @@ PIPE_OPERATOR(TupleType&& tpl, const UnderscoreTags::GetTag<TupleIndex>&) {
   return std::get<TupleIndex>(tpl);
 }
 
-// hash - stl
+/// hash - stl
 CREATE_TAG_0_ARG( HashTag );
 template <typename ValueType>
 size_t
@@ -786,7 +790,7 @@ PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::HashTag&) {
   return hasher(value);
 }
 
-// includes
+/// includes
 CREATE_TAG_1_ARG( IncludesTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -794,7 +798,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::IncludesTag1
   return std::includes(std::begin(container), std::end(container), std::begin(tag.arg0), std::end(tag.arg0));
 }
 
-// inserter - stl
+/// inserter - stl
 CREATE_TAG_1_ARG( InserterTag );
 template <typename ContainerType, typename ArgType0>
 std::insert_iterator<ContainerType>
@@ -804,7 +808,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::InserterTag1Arg<Ar
   return std::inserter(container, tag.arg0);
 }
 
-// is_sorted - stl
+/// is_sorted - stl
 CREATE_TAG_0_1_ARG( IsSortedTag );
 template <typename ContainerType>
 bool
@@ -817,7 +821,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::IsSortedTag1
   return std::is_sorted(std::begin(container), std::end(container), tag.arg0);
 }
 
-// lexicographical_compare
+/// lexicographical_compare
 CREATE_TAG_1_ARG( LexicographicalCompareTag );
 template <typename ContainerType, typename ArgType0> // mutable
 bool
@@ -825,7 +829,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::Lexicographi
   return std::lexicographical_compare(std::begin(container), std::end(container), std::begin(tag.arg0), std::end(tag.arg0));
 }
 
-// lower_bound
+/// lower_bound
 CREATE_TAG_1_ARG( LowerBoundTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -840,7 +844,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::LowerBoundTag1Arg<
   return std::lower_bound(std::begin(container), std::end(container), tag.arg0);
 }
 
-// max_element
+/// max_element
 CREATE_TAG_1_ARG(MaxElementTag);
 template <typename ContainerType> // immutable
 typename ContainerType::const_iterator
@@ -855,7 +859,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::MaxElementTag&) {
   return std::max_element(std::begin(container), std::end(container));
 }
 
-// min_element - stl
+/// min_element - stl
 CREATE_TAG_0_ARG( MinElementTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_iterator
@@ -879,7 +883,7 @@ PIPE_OPERATOR(UnderscoreDetail::mutable_container_base<ContainerType>&& containe
   return std::min_element(std::begin(container), std::end(container));
 }
 
-// minmax_element - stl
+/// minmax_element - stl
 CREATE_TAG_0_ARG( MinMaxElementTag );
 template <typename ContainerType> // immutable
 typename std::pair<typename ContainerType::const_iterator, typename ContainerType::const_iterator>
@@ -909,7 +913,7 @@ PIPE_OPERATOR(ValueType& value, const UnderscoreTags::MoveTag&) {
   return std::move(value);
 }
 
-// next - stl
+/// next - stl
 CREATE_TAG_0_1_ARG( NextTag );
 template <typename IteratorType>
 IteratorType
@@ -922,7 +926,7 @@ PIPE_OPERATOR(const IteratorType& iterator, const UnderscoreTags::NextTag1Arg<Di
   return std::next(iterator, tag.arg0);
 }
 
-// none_of - stl
+/// none_of - stl
 CREATE_TAG_1_ARG( NoneOfTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -930,7 +934,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::NoneOfTag1Ar
   return std::none_of(std::begin(container), std::end(container), tag.arg0);
 }
 
-// none_of_equal - stl
+/// none_of_equal - stl
 CREATE_TAG_1_ARG( NoneOfEqualTag );
 template <typename ContainerType, typename ArgType0>
 bool
@@ -938,7 +942,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::NoneOfEqualT
   return std::find(std::begin(container), std::end(container), tag.arg0) == std::end(container);
 }
 
-// prev - stl
+/// prev - stl
 CREATE_TAG_0_1_ARG( PrevTag );
 template <typename IteratorType> // immutable
 IteratorType
@@ -951,7 +955,7 @@ PIPE_OPERATOR(const IteratorType& iterator, const UnderscoreTags::PrevTag1Arg<Di
   return std::prev(iterator, tag.arg0);
 }
 
-// upper_bound - stl
+/// upper_bound - stl
 CREATE_TAG_1_ARG( UpperBoundTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -971,9 +975,9 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::UpperBoundTag1Arg<
 // set_union
 // set_...
 // mismatch
-// tranformed
-
 // transform
+
+/// transform
 namespace UnderscoreTags {
   template <typename FunctorType>
   struct TransformTag1Arg {
@@ -1176,19 +1180,19 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::TransformTag
     return CONTAINER_NAME<typename ContainerType::value_type>(std::begin(value), std::end(value)); \
   }
 */
-// to_vector
+/// to_vector
 CREATE_MUTABLE_TAG_1_ARG(ToVectorTag, PreallocatedVectorType, preallocated_vector);
 CREATE_TO_SPECIFIC_CONTAINER_PIPE( ToVectorTag, std::vector );
 
-// to_deque
+/// to_deque
 CREATE_MUTABLE_TAG_1_ARG(ToDequeTag, PreallocatedDequeType, preallocated_deque);
 CREATE_TO_SPECIFIC_CONTAINER_PIPE( ToDequeTag, std::deque );
 
-// to_list
+/// to_list
 CREATE_MUTABLE_TAG_1_ARG(ToListTag, PreallocatedListType, preallocated_list);
 CREATE_TO_SPECIFIC_CONTAINER_PIPE( ToListTag, std::list );
 
-// to_set, to_multiset, to_unordered_set
+/// to_set, to_multiset, to_unordered_set
 CREATE_TO_SPECIFIC_SET_PIPE( ToSetTag, std::set );
 CREATE_TO_SPECIFIC_SET_PIPE( ToMultiSetTag, std::multiset );
 CREATE_TO_SPECIFIC_SET_PIPE( ToUnorderedSetTag, std::unordered_set );
@@ -1217,17 +1221,24 @@ CREATE_PIPE_0_ARG(ModfTag, ::modf);
 CREATE_PIPE_0_ARG(PowTag, ::pow);
 CREATE_PIPE_0_ARG(TanhTag, ::tanh);
 
-// round
+/// round
 CREATE_TAG_0_ARG( RoundTag );
 template <typename ValueType>
 ValueType
 PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::RoundTag&) {
-  if( std::is_integral<ValueType>::value )
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning( disable : 4127) // warning C4127: conditional expression is constant
+#endif
+  if( std::is_integral<ValueType>::value == true )
     return value;
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
   return ::floor(value + static_cast<ValueType>(0.5));
 }
 
-// erase_all
+/// erase_all
 CREATE_TAG_1_ARG( EraseAllTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1238,7 +1249,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseAllTag1Arg<Arg
   return container;
 }
 
-// erase_all_unstable
+/// erase_all_unstable
 namespace UnderscoreDetail {
   // remove_unstable
   template <typename IteratorType, typename ValueType>
@@ -1265,7 +1276,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseAllUnstableTag
   return container;
 }
 
-// erase_all_if
+/// erase_all_if
 CREATE_TAG_1_ARG( EraseAllIfTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1276,7 +1287,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseAllIfTag1Arg<A
   return container;
 }
 
-// erase_all_if_unstable
+/// erase_all_if_unstable
 namespace UnderscoreDetail {
   template <typename IteratorType, typename PredicateType>
   IteratorType
@@ -1302,7 +1313,8 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseAllIfUnstableT
   return container;
 }
 
-// erase_consecutive_duplicates
+
+/// erase_consecutive_duplicates.
 CREATE_TAG_1_ARG( EraseConsecutiveDuplicatesTag );
 template <typename ContainerType>
 ContainerType
@@ -1313,7 +1325,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseConsecutiveDup
   return container;
 }
 
-// erase_duplicates_stable
+/// erase_duplicates_stable
 CREATE_TAG_0_ARG( EraseDuplicatesStableTag );
 template <typename ContainerType>
 ContainerType
@@ -1333,7 +1345,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseDuplicatesStab
   return container;
 }
 
-// erase_duplicates_unstable
+/// erase_duplicates_unstable
 CREATE_TAG_0_ARG( EraseDuplicatesUnstableTag );
 template <typename ContainerType>
 ContainerType
@@ -1346,7 +1358,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseDuplicatesUnst
   return container;
 }
 
-// erase_first
+/// erase_first
 CREATE_TAG_1_ARG( EraseFirstTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1356,7 +1368,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseFirstTag1Arg<A
   return container;
 }
 
-// erase_first_if
+/// erase_first_if
 CREATE_TAG_1_ARG( EraseFirstIfTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1366,7 +1378,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseFirstIfTag1Arg
   return container;
 }
 
-// erase_last
+/// erase_last
 CREATE_TAG_1_ARG( EraseLastTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1376,7 +1388,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseLastTag1Arg<Ar
   return container;
 }
 
-// erase_last_if
+/// erase_last_if
 CREATE_TAG_1_ARG( EraseLastIfTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1386,7 +1398,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::EraseLastIfTag1Arg<
   return container;
 }
 
-// trim
+/// trim
 namespace UnderscoreDetail {
   const static std::array<char, 4> default_trim_characters = {' ', '\t', '\n', '\r'};
   // trim_left
@@ -1413,7 +1425,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::TrimTag&) {
   return container;
 }
 
-// trim_left
+/// trim_left
 CREATE_TAG_0_ARG( TrimLeftTag );
 template <typename ContainerType>
 ContainerType
@@ -1422,7 +1434,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::TrimLeftTag&) {
   return container;
 }
 
-// trim_right
+/// trim_right
 CREATE_TAG_0_ARG( TrimRightTag );
 template <typename ContainerType>
 ContainerType
@@ -1431,7 +1443,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::TrimRightTag&) {
   return container;
 }
 
-// inserted_back
+/// inserted_back
 CREATE_TAG_1_ARG( InsertedBackTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1440,7 +1452,7 @@ ContainerType
   return container;
 }
 
-// inserted_front
+/// inserted_front
 CREATE_TAG_1_ARG( InsertedFrontTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
@@ -1449,7 +1461,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::InsertedFrontTag1Ar
   return container;
 }
 
-// pipe
+/// pipe
 namespace UnderscoreTags {
   template <typename FunctorType>
   struct PipeTag1Arg {
@@ -1486,7 +1498,7 @@ PIPE_OPERATOR(const Left& left, const UnderscoreTags::PipeTag2Arg<FunctorType, A
   return tag.functor(left, tag.arg0);
 }
 
-// pop_back
+/// pop_back
 CREATE_TAG_0_1_ARG( PopBackTag );
 template <typename ContainerType>
 ContainerType
@@ -1502,7 +1514,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::PopBackTag1Arg<ArgT
   return container;
 }
 
-// pop_front
+/// pop_front
 CREATE_TAG_0_1_ARG( PopFrontTag );
 template <typename ContainerType>
 ContainerType
@@ -1517,7 +1529,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::PopFrontTag1Arg<Arg
   return container;
 }
 
-// push_back
+/// push_back
 CREATE_TAG_0_1_ARG( PushBackTag );
 template <typename ContainerType>
 ContainerType
@@ -1532,7 +1544,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::PushBackTag1Arg<Arg
   return container;
 }
 
-// push_front
+/// push_front
 CREATE_TAG_0_1_ARG( PushFrontTag );
 template <typename ContainerType>
 ContainerType
@@ -1589,23 +1601,23 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::PushFrontTag1Arg<Ar
     return container; \
   }
 
-// fill
+/// fill
 CREATE_TAG_1_ARG( FillTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_1ARG( FillTag, std::fill );
 
-// generate
+/// generate
 CREATE_TAG_1_ARG( GenerateTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_1ARG( GenerateTag, std::generate );
 
-// reverse
+/// reverse
 CREATE_TAG_0_ARG( ReverseTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0ARG( ReverseTag, std::reverse );
 
-// unique
+/// unique
 CREATE_TAG_0_ARG( UniqueTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0ARG( UniqueTag, std::unique );
 
-// replace
+/// replace
 CREATE_TAG_2_ARG( ReplaceTag );
 template <typename ContainerType>
 ContainerType
@@ -1614,57 +1626,57 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ReplaceTag2Arg<type
   return container;
 }
 
-// replace_if
+/// replace_if
 CREATE_TAG_2_ARG( ReplaceIfTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_2ARG( ReplaceIfTag, std::replace_if );
 
-// shuffle
+/// shuffle
 CREATE_TAG_0_ARG( ShuffleTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0ARG( ShuffleTag, std::shuffle );
 
-// random_shuffle
+/// random_shuffle
 CREATE_TAG_0_ARG( RandomShuffleTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0ARG( RandomShuffleTag, std::random_shuffle );
 
-// sort
+/// sort
 CREATE_TAG_0_1_ARG( SortTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0_1_ARG( SortTag, std::sort );
 
-// stable_sort
+/// stable_sort
 CREATE_TAG_0_1_ARG( StableSortTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0_1_ARG( StableSortTag, std::stable_sort );
 
-// stable_partition - todo add predicate
+/// stable_partition - todo add predicate
 CREATE_TAG_0_1_ARG( StablePartitionTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0_1_ARG( StablePartitionTag, std::stable_partition );
 
-// partition - todo add predicate
+/// partition - todo add predicate
 CREATE_TAG_1_ARG( PartitionTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_1ARG( PartitionTag, std::partition );
 
-// nth_element - todo add predicate
+/// nth_element - todo add predicate
 CREATE_TAG_1_ARG( NthElementTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_SPECIAL( NthElementTag1Arg, {std::nth_element(std::begin(container), std::begin(container) + tag.arg0, std::end(container));}  );
 
-// next_permutation
+/// next_permutation
 CREATE_TAG_0_ARG( NextPermutationTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0ARG( NextPermutationTag, std::next_permutation );
 
-// prev_permutation
+/// prev_permutation
 CREATE_TAG_0_ARG( PrevPermutationTag );
 CREATE_MUTABLE_PIPE_IMPLEMENTATION_0ARG( PrevPermutationTag, std::prev_permutation );
 
-// rotated
-CREATE_TAG_1_ARG( RotatedTag );
+/// rotate
+CREATE_TAG_1_ARG( RotateTag );
 template <typename ContainerType, typename ArgType0>
 ContainerType
-PIPE_OPERATOR(ContainerType container, const UnderscoreTags::RotatedTag1Arg<ArgType0>& tag) {
+PIPE_OPERATOR(ContainerType container, const UnderscoreTags::RotateTag1Arg<ArgType0>& tag) {
   const auto& first = std::begin(container);
   std::rotate(first, std::next(first, tag.arg0), std::end(container));
   return container;
 }
 
-// as
+/// as
 CREATE_TAG_TEMPLATE( AsTag );
 template <typename InType, typename OutType>
 OutType
@@ -1674,7 +1686,7 @@ PIPE_OPERATOR(const InType& value, const UnderscoreTags::AsTag<OutType>&) {
   return dynamic_cast<OutType>(value);
 }
 
-// as_const
+/// as_const
 CREATE_TAG_0_ARG( AsConstTag );
 template <typename ValueType>
 const ValueType&
@@ -1682,7 +1694,7 @@ PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::AsConstTag&) {
   return value;
 }
 
-// clamp
+/// clamp
 CREATE_TAG_2_ARG_SAME_TYPE( ClampTag );
 template <typename ValueType>
 ValueType
@@ -1692,31 +1704,33 @@ PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::ClampTag2Arg<ValueTy
   return value;
 }
 
-// checked_delete
+/// checked_delete
 CREATE_TAG_0_ARG( CheckedDeleteTag );
 template <typename PointerType>
 const UnderscoreTags::CheckedDeleteTag&
 operator>>(const UnderscoreTags::CheckedDeleteTag& tag, PointerType& ptr) {
   static_assert(std::is_pointer<PointerType>::value == true, "");
   const auto& dummy = sizeof(*ptr);
+	(void) dummy;
   delete ptr;
   ptr = nullptr;
   return tag;
 }
 
-// checked_delete_array
+/// checked_delete_array
 CREATE_TAG_0_ARG( CheckedDeleteArrayTag );
 template <typename PointerType>
 const UnderscoreTags::CheckedDeleteArrayTag&
 operator>>(const UnderscoreTags::CheckedDeleteArrayTag& tag, PointerType& ptr) {
   static_assert(std::is_pointer<PointerType>::value == true, "");
   const auto& dummy = sizeof(*ptr);
+	(void) dummy;
   delete [] ptr;
   ptr = nullptr;
   return tag;
 }
 
-// deref
+/// deref
 CREATE_TAG_0_ARG( DerefTag );
 template <typename DereferableType> // immutable
 decltype(*DereferableType())
@@ -1729,7 +1743,7 @@ PIPE_OPERATOR(DereferableType& value, const UnderscoreTags::DerefTag&) {
   return (*value);
 }
 
-// find_first_of
+/// find_first_of
 CREATE_TAG_1_ARG( FindFirstOfTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -1744,7 +1758,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FindFirstOfTag1Arg
   return std::find_first_of(std::begin(container), std::end(container), std::begin(tag.arg0), std::end(tag.arg0));
 }
 
-// find_first_not_of
+/// find_first_not_of
 CREATE_TAG_1_ARG( FindFirstNotOfTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -1759,24 +1773,18 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FindFirstNotOfTag1
   return UnderscoreDetail::find_first_not_of(std::begin(container), std::end(container), std::begin(tag.arg0), std::end(tag.arg0));
 }
 
-// find_last_of
+/// find_last_of
 namespace UnderscoreDetail {
   template <typename IteratorType0, typename IteratorType1>
   IteratorType0
   find_last_of(const IteratorType0& first, IteratorType0 last, const IteratorType1& s_first, const IteratorType1& s_last) {
     if (first == last)
       return last;
-    //const auto before_first = std::prev(first);
-    do{
+    do {
       --last;
       if (std::find(s_first, s_last, *last) != s_last)
         return last;
     } while(last != first);
-    /*
-    for(--last; last != first; --last)
-      if (std::find(s_first, s_last, *last) != s_last)
-        return last;
-        */
     return first;
   }
 }
@@ -1794,7 +1802,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FindLastOfTag1Arg<
   return UnderscoreDetail::find_last_of(std::begin(container), std::end(container), std::begin(tag.arg0), std::end(tag.arg0));
 }
 
-// find_last_not_of
+/// find_last_not_of
 CREATE_TAG_1_ARG( FindLastNotOfTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_iterator
@@ -1809,83 +1817,86 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::FindLastNotOfTag1A
   return UnderscoreDetail::find_last_not_of(std::begin(container), std::end(container), std::begin(tag.arg0), std::end(tag.arg0));
 }
 
-// max_value
+/// max_value
 CREATE_TAG_0_ARG( MaxValueTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_reference
 PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::MaxValueTag&) {
+	UNDERSCORE_ASSERT(container.empty() == false);
   return *std::max_element(std::begin(container), std::end(container));
 }
 template <typename ContainerType> // mutable
 typename ContainerType::reference
 PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::MaxValueTag&) {
+	UNDERSCORE_ASSERT(container.empty() == false);
   return *std::max_element(std::begin(container), std::end(container));
 }
 template <typename ContainerType> // r-value
 typename ContainerType::value_type
 PIPE_OPERATOR(ContainerType&& container, const UnderscoreTags::MaxValueTag&) {
+	UNDERSCORE_ASSERT(container.empty() == false);
   return *std::max_element(std::begin(container), std::end(container));
 }
 
-// mean_value
+/// mean_value
 CREATE_TAG_0_ARG( MeanValueTag );
 template <typename ContainerType>
 typename std::decay<typename ContainerType::value_type>::type
 PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::MeanValueTag&) {
+	UNDERSCORE_ASSERT(container.empty() == false);
   const auto& first = std::begin(container);
   const auto& last = std::end(container);
   const auto& num_elements = static_cast<typename ContainerType::value_type>(container.size());
-  UNDERSCORE_ASSERT(num_elements > 0);
   const auto& sum = std::accumulate(std::next(first), last, *first) / num_elements;
   return sum;
 }
 
-// min_value
+/// min_value
 CREATE_TAG_0_ARG( MinValueTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_reference
 PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::MinValueTag&) {
-  UNDERSCORE_ASSERT(!container.empty());
+  UNDERSCORE_ASSERT(container.empty() == false);
   return *std::min_element(std::begin(container), std::end(container));
 }
 template <typename ContainerType> // mutable
 typename ContainerType::reference
 PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::MinValueTag&) {
-  UNDERSCORE_ASSERT(!container.empty());
+  UNDERSCORE_ASSERT(container.empty() == false);
   return *std::min_element(std::begin(container), std::end(container));
 }
 template <typename ContainerType> // r-value
 typename ContainerType::value_type
 PIPE_OPERATOR(ContainerType&& container, const UnderscoreTags::MinValueTag&) {
-  UNDERSCORE_ASSERT(!container.empty());
+  UNDERSCORE_ASSERT(container.empty() == false);
   return *std::min_element(std::begin(container), std::end(container));
 }
 
-// minmax_value
+/// minmax_value
 CREATE_TAG_0_ARG( MinMaxValueTag );
 template <typename ContainerType> // immutable
 typename std::pair<typename ContainerType::const_reference, typename ContainerType::const_reference>
 PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::MinMaxValueTag&) {
-  UNDERSCORE_ASSERT(!container.empty());
+  UNDERSCORE_ASSERT(container.empty() == false);
   const auto& locations = std::minmax_element(std::begin(container), std::end(container));
   return std::pair<typename ContainerType::const_reference, typename ContainerType::const_reference>(*locations.first, *locations.second);
 }
 template <typename ContainerType> // mutable
 typename std::pair<typename ContainerType::reference, typename ContainerType::reference>
 PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::MinMaxValueTag&) {
-  UNDERSCORE_ASSERT(!container.empty());
+  UNDERSCORE_ASSERT(container.empty() == false);
   auto locations = std::minmax_element(std::begin(container), std::end(container));
   return std::pair<typename ContainerType::reference, typename ContainerType::reference>(*locations.first, *locations.second);
 }
 template <typename ContainerType> // r-value
 typename std::pair<typename ContainerType::value_type, typename ContainerType::value_type>
 PIPE_OPERATOR(ContainerType&& container, const UnderscoreTags::MinMaxValueTag&) {
-  UNDERSCORE_ASSERT(!container.empty());
+  UNDERSCORE_ASSERT(container.empty() == false);
   auto locations = std::minmax_element(std::begin(container), std::end(container));
   return std::pair<typename ContainerType::value_type, typename ContainerType::value_type>(*locations.first, *locations.second);
 }
 
-// reinterval
+/// reinterval
 CREATE_TAG_4_ARG_SAME_TYPE( ReintervalTag );
 template <typename ValueType>
 ValueType
@@ -1898,7 +1909,7 @@ PIPE_OPERATOR(ValueType value, const UnderscoreTags::ReintervalTag4Arg<ValueType
   return value;
 }
 
-// reinterval_clamped
+/// reinterval_clamped
 CREATE_TAG_4_ARG_SAME_TYPE( ReintervalClampedTag );
 template <typename ValueType>
 ValueType
@@ -1913,7 +1924,7 @@ PIPE_OPERATOR(ValueType value, const UnderscoreTags::ReintervalClampedTag4Arg<Va
   return value;
 }
 
-// to
+/// to
 CREATE_TAG_TEMPLATE( ToTag );
 template <typename InType, typename OutType>
 OutType
@@ -1921,7 +1932,7 @@ PIPE_OPERATOR(const InType& value, const UnderscoreTags::ToTag<OutType>&) {
   return (const OutType)(value);
 }
 
-// to_container - todo preallocation, name it copy
+/// to_container - todo preallocation, name it copy
 CREATE_TAG_TEMPLATE( ToContainerTag );
 template <typename ContainerType, typename OutContainerType>
 OutContainerType
@@ -1929,7 +1940,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::ToContainerT
   return OutContainerType(std::begin(container), std::end(container));
 }
 
-// copy_if
+/// copy_if
 CREATE_TAG_2_ARG( CopyIfTag );
 template <typename ContainerType, typename PredicateType, typename OutContainerType>
 typename std::decay<OutContainerType>::type
@@ -1959,7 +1970,7 @@ PIPE_OPERATOR(const ContainerType& container, UnderscoreTags::CopyIfTag2Arg<Pred
   return output_container;
 }
 
-// mutate
+/// mutate
 CREATE_TAG_0_ARG( MutateTag );
 template <typename ContainerType>
 UnderscoreDetail::mutable_container_base<ContainerType>
@@ -1968,7 +1979,7 @@ PIPE_OPERATOR(ContainerType& container, const UnderscoreTags::MutateTag&) {
   return UnderscoreDetail::mutable_container_base<ContainerType>(std::addressof(container));
 }
 
-// empty
+/// empty
 CREATE_TAG_0_ARG( EmptyTag );
 template <typename ContainerType>
 bool
@@ -1976,7 +1987,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::EmptyTag&) {
   return container.empty();
 }
 
-// size
+/// size
 CREATE_TAG_0_ARG( SizeTag );
 template <typename ContainerType>
 typename ContainerType::size_type
@@ -1984,7 +1995,7 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::SizeTag&) {
   return container.size();
 }
 
-// front
+/// front
 CREATE_TAG_0_ARG( FrontTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_reference
@@ -2005,7 +2016,7 @@ PIPE_OPERATOR(ContainerType&& container, const UnderscoreTags::FrontTag&) {
   return container.front();
 }
 
-// back
+/// back
 CREATE_TAG_0_ARG( BackTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_reference
@@ -2026,7 +2037,7 @@ PIPE_OPERATOR(ContainerType&& container, const UnderscoreTags::BackTag&) {
   return container.back();
 }
 
-// middle
+/// middle
 CREATE_TAG_0_ARG( MiddleTag );
 template <typename ContainerType> // immutable
 typename ContainerType::const_reference
@@ -2047,7 +2058,7 @@ PIPE_OPERATOR(ContainerType&& container, const UnderscoreTags::MiddleTag&) {
   return *std::next(container.begin(), container.size() / 2);
 }
 
-// is_any_of
+/// is_any_of
 CREATE_TAG_1_2_3_4_ARG_SAME_TYPE( IsAnyOfTag );
 template <typename ValueType, typename ArgType0>
 bool
@@ -2070,7 +2081,7 @@ PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::IsAnyOfTag4Arg<ArgTy
   return value == tag.arg0 || value == tag.arg1 || value == tag.arg2 || value == tag.arg3;
 }
 
-// at
+/// at
 CREATE_TAG_1_ARG( AtTag );
 template <typename ContainerType, typename ArgType0> // immutable
 typename ContainerType::const_reference
@@ -2091,7 +2102,7 @@ PIPE_OPERATOR(ContainerType&& container, const UnderscoreTags::AtTag1Arg<ArgType
   return *std::next(container.begin(), tag.arg0);
 }
 
-// value_or_default
+/// value_or_default
 CREATE_TAG_2_ARG( ValueOrDefaultTag );
 template <typename MapType, typename ArgType0, typename ArgType1> // immutable
 const ArgType1&
@@ -2112,7 +2123,7 @@ PIPE_OPERATOR(MapType&& dictionary, UnderscoreTags::ValueOrDefaultTag2Arg<ArgTyp
   return it == dictionary.end() ? tag.arg1 : it->second;
 }
 
-// type_name
+/// type_name
 CREATE_TAG_0_ARG( TypeNameTag );
 template <typename ValueType>
 std::string
@@ -2185,6 +2196,7 @@ namespace UnderscoreDetail {
     return UnderscoreDetail::to_string_impl(value, typename std::is_arithmetic<ValueType>::type(), std::false_type() );
   }
 }
+/// to_string/to_wstring
 CREATE_TAG_0_ARG( ToStringTag );
 CREATE_TAG_0_ARG( ToWstringTag );
 template <typename ValueType> // std::string
@@ -2194,7 +2206,7 @@ PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::ToStringTag&) {
 }
 template <typename ValueType> // std::wstring
 std::wstring
-PIPE_OPERATOR(const ValueType& value, const UnderscoreTags::ToWstringTag&) {
+PIPE_OPERATOR(const ValueType&, const UnderscoreTags::ToWstringTag&) {
   return std::wstring(); //UnderscoreDetail::to_wstring(value); todo
 }
 
@@ -2209,7 +2221,7 @@ std::wstring
 PIPE_OPERATOR(const std::vector<ValueType, AllocType>& container, const UnderscoreTags::ToWstringTag&) {
   return UnderscoreDetail::container_to_string<std::wstring, std::wstringstream>(container);
 }
-// to_string - list
+// to_string/to_wstring - list
 template <typename ValueType, typename AllocType>
 std::string
 PIPE_OPERATOR(const std::list<ValueType, AllocType>& container, const UnderscoreTags::ToStringTag&) {
@@ -2220,7 +2232,7 @@ std::wstring
 PIPE_OPERATOR(const std::list<ValueType, AllocType>& container, const UnderscoreTags::ToWstringTag&) {
   return UnderscoreDetail::container_to_string<std::wstring, std::wstringstream>(container);
 }
-// to_string - deque
+/// to_string/to_wstring - deque
 template <typename ValueType, typename AllocType>
 std::string
 PIPE_OPERATOR(const std::deque<ValueType, AllocType>& container, const UnderscoreTags::ToStringTag&) {
@@ -2231,10 +2243,22 @@ std::wstring
 PIPE_OPERATOR(const std::deque<ValueType, AllocType>& container, const UnderscoreTags::ToWstringTag&) {
   return UnderscoreDetail::container_to_string<std::wstring, std::wstringstream>(container);
 }
+/// to_string/to_wstring - array
+template <typename ValueType, size_t N>
+std::string
+PIPE_OPERATOR(const std::array<ValueType, N>& container, const UnderscoreTags::ToStringTag&) {
+		return UnderscoreDetail::container_to_string<std::string, std::stringstream>(container);
+}
+template <typename ValueType, size_t N>
+std::wstring
+PIPE_OPERATOR(const std::array<ValueType, N>& container, const UnderscoreTags::ToWstringTag&) {
+		return UnderscoreDetail::container_to_string<std::wstring, std::wstringstream>(container);
+}
 
 
 
-// replace_substring - todo improve performance
+
+/// replace_substring - todo improve performance
 namespace UnderscoreDetail {
   template <typename ContainerType, typename OriginalSequenceIterator, typename ReplacementSequenceIterator>
   size_t
@@ -2307,7 +2331,7 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ReplaceSubstringTag
   return container;
 }
 
-// str
+/// str
 CREATE_TAG_0_ARG( StrTag );
 template <typename ValueType>
 UnderscoreDetail::make_string
@@ -2317,7 +2341,7 @@ operator<<(const UnderscoreTags::StrTag&, const ValueType& value) {
   return mstr;
 }
 
-// wstr
+/// wstr
 CREATE_TAG_0_ARG( WstrTag );
 template <typename ValueType>
 UnderscoreDetail::make_wstring
@@ -2327,18 +2351,19 @@ operator<<(const UnderscoreTags::WstrTag&, const ValueType& value) {
   return mstr;
 }
 
-// tokenize string
+/// tokenize_string
 CREATE_TAG_1_ARG(TokenizeStringTag);
 template <typename ContainerType, typename ArgType0>
 std::vector<ContainerType>
 PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::TokenizeStringTag1Arg<ArgType0>& tag) {
 	std::vector<ContainerType> tokens;
 	tokens.reserve(16);
+	const auto& null_character = static_cast<typename ContainerType::value_type>(0);
 	const auto& container_begin = std::begin(container);
 	const auto& container_end = std::end(container);
 	const auto& delimiters = tag.arg0;
 	const auto& delimiters_begin = std::begin(delimiters);
-	const auto& delimiters_end = std::find(delimiters_begin, std::end(delimiters), 0); // Find null, to be compatible with char literals
+	const auto& delimiters_end = std::find(delimiters_begin, std::end(delimiters), null_character); // Find null, to be compatible with char literals
 	for(auto left = UnderscoreDetail::find_first_not_of(container_begin, container_end, delimiters_begin, delimiters_end);
 		left != container_end;
 		left = UnderscoreDetail::find_first_not_of(left, container_end, delimiters_begin, delimiters_end)
@@ -2352,23 +2377,23 @@ PIPE_OPERATOR(const ContainerType& container, const UnderscoreTags::TokenizeStri
   return tokens;
 }
 
-// to_lower
+/// to_lower
 CREATE_TAG_0_ARG( ToLowerTag );
 template<typename ContainerType>
 ContainerType
 PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ToLowerTag&) {
   for(auto it = std::begin(container); it != std::end(container); ++it)
-    *it = ::tolower(*it);
+    *it = static_cast<typename ContainerType::value_type>(::toupper(*it));
   return container;
 }
 
-// to_upper
+/// to_upper
 CREATE_TAG_0_ARG( ToUpperTag );
 template<typename ContainerType>
 ContainerType
 PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ToUpperTag&) {
   for(auto it = std::begin(container); it != std::end(container); ++it)
-    *it = ::toupper(*it);
+    *it = static_cast<typename ContainerType::value_type>(::toupper(*it));
   return container;
 }
 
@@ -2377,9 +2402,8 @@ PIPE_OPERATOR(ContainerType container, const UnderscoreTags::ToUpperTag&) {
 
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//-----------------------------------------------------------------------------------------
+
 
 
 struct Underscore {
@@ -2436,7 +2460,7 @@ struct Underscore {
   UnderscoreTags::MinElementTag min_element;
   UnderscoreTags::MinMaxElementTag minmax_element;
   UnderscoreTags::PrevTag prev;
-  UnderscoreTags::RotatedTag rotated;
+  UnderscoreTags::RotateTag rotate;
   UnderscoreTags::ToStringTag to_string;
   UnderscoreTags::ToWstringTag to_wstring;
   UnderscoreTags::BinarySearchTag binary_search;//

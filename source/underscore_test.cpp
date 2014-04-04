@@ -16,10 +16,9 @@ Unit tests.
 
 
 #define TEST(left, right) {\
-  const auto l = (left);\
-  const auto r = (right);\
-  if (l != r) { \
+  if ((left) != (right)) { \
     std::cout << "Fail:   (" << #left << ") == (" << #right << ")" << std::endl; \
+		std::cout << ((left) | _.to_string) << std::endl; \
   } else { \
   }}
   //std::cout << "Succes: (" << #left << ") == (" << #right << ")" << std::endl; \
@@ -46,14 +45,13 @@ void run_underscore_test() {
   {
     auto ptr_a = new int;
     auto ptr_b = new std::vector<int>(1000);
+		auto ptr_c = ptr_b;
     _.checked_delete >> ptr_a >> ptr_b;
     TEST(ptr_a, nullptr);
     TEST(ptr_b, nullptr);
-    LOGV(ptr_a | _.type_name);
-    LOGV(ptr_b | _.type_name);
+    TEST((ptr_a | _.type_name) == (ptr_b | _.type_name), false);
+		TEST((ptr_b | _.type_name) == (ptr_c | _.type_name), true);
   }
-
-  
 
   // Misc
   {  
@@ -64,7 +62,8 @@ void run_underscore_test() {
     TEST( array.data() , array | _.first | _.adressof );
     TEST( array | _.begin | *_ , array | _.begin | _.deref );
     TEST( array | _.front | _.adressof , array | _.front | &_ );
-    TEST( vector | _.push_back(8) | _.back() , 8 );  
+    TEST( vector | _.push_back(88) | _.back() , 88 ); 
+		TEST( vector | _.to_deque | _.push_front(88) | _.front() , 88 ); 
     TEST( 7 | _.is_any_of(1,2,3,4), false);
     TEST( 7 | _.is_any_of(1,2,7,4), true);
   }
@@ -82,13 +81,14 @@ void run_underscore_test() {
   // algorithms
   {
     TEST( array | _.equal(vector), true);
+		TEST( array | _.equal(vector | _.push_back), false);
     TEST( array | _.replace(4, 8) , _.array(8,3,8,5,6,7) );
     TEST( array | _.for_each([](int& val){val*=2;}) , _.array(8,6,8,10,12,14) );
     TEST( array | _.accumulate , std::accumulate(array.begin(), array.end(), 0) );
     TEST( array | _.sort | _.is_sorted, true );
-    TEST( array | _.rotated(3) , _.array(5,6,7,4,3,4) );
+    TEST( array | _.rotate(3) , _.array(5,6,7,4,3,4) );
     TEST( array | _.sort | _.random_shuffle | _.is_sorted , false );
-    TEST( array | _.count_if([](int val) {return true;}) , array | _.size );
+    TEST( array | _.count_if([](int val) {return val > 0;}) , array | _.size );
     TEST( array | _.count(4) , 2 );
   }
 
@@ -153,6 +153,13 @@ void run_underscore_test() {
     v | _.mutate  | _.random_shuffle |  _.sort | _.pop_back;
     TEST( v | _.is_sorted , true );
     TEST( v | _.size , vector.size() - 1);
+		_[v] | _.pop_back | _.random_shuffle | _.sort;
+		TEST( v | _.size , vector.size() - 2);
+		TEST( v | _.is_sorted , true );
+
+		TEST( (v | _.mutate | _.sort | _.front) > 0, true);
+		const auto& x = v | _.mutate | _.sort | _.min_value;
+		//++x;
   }
   
   // Math
@@ -160,6 +167,7 @@ void run_underscore_test() {
     TEST( 1.0 | _.reinterval(0.0, 10.0, 0.0, 100.0) , 10.0 );
     TEST( 0.6 | _.round, 1.0);
     TEST( 1.49 | _.round, 1.0);
+		TEST( 100.0 | _.sin | _.cos | _.tan| _.asin | _.acos | _.atan | _.sinh | _.cosh | _.tanh | _.abs| _.fabs | _.ceil | _.floor | _.round | _.clamp(0.0, 0.0), 0.0);
   }
   
   // transform
@@ -167,7 +175,7 @@ void run_underscore_test() {
     std::vector<float> vec_transform;
     for(const auto& val: vector)
       vec_transform.push_back(val*val | _.to<float>());
-    auto functor = [](int x) -> float { return (float)(x*x); };
+    const auto& functor = [](int x) -> float { return (float)(x*x); };
     // transform
     TEST(vector | _.transform(functor), vec_transform);
     // transform_to
@@ -223,8 +231,8 @@ void run_underscore_test() {
     // 
     std::wstring wstrTest = L"ABC";
     std::string strTest = "ABC";
-    TEST(_.str << wstrTest, _.str << "ABC");
-    TEST(_.wstr << strTest, _.wstr << L"abc");
+    //TEST(_.str << wstrTest, _.str << "ABC");
+    //TEST(_.wstr << strTest, _.wstr << L"abc");
     // TOdo more
   }
   
