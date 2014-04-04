@@ -85,7 +85,7 @@ Done:
 //
 namespace UnderscoreDetail {
 
-	class rvalue_container {};
+    struct rvalue_container {};
 
   // mutable_container_base
   template <typename ContainerType>
@@ -164,6 +164,16 @@ namespace UnderscoreDetail {
     const_iterator crend() const { return container_->crend(); }
   private:
     ContainerType* container_;
+  };
+  
+  // mutable container traits
+  template <typename NonMutatingContainerType>
+  struct is_mutating_container {
+    const static bool value = false;
+  };
+  template <typename BaseContainerType>
+  struct is_mutating_container<mutable_container_base<BaseContainerType> > {
+    const static bool value = true;
   };
 
   // find_first_not_of
