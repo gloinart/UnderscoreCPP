@@ -7,7 +7,7 @@ Elegant C++
 
 Code examples:
 
-Create containers
+Create containers<br/>
   auto array = _.array(1,2,3,4,5);
   auto vector = _.array(1,2,3,4,5) | _.to_vector;
   auto deque = _.array(1,2,3,4,5) | _.to_deque;
