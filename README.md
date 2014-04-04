@@ -2,6 +2,7 @@ UnderscoreCPP
 =============
 
 Underscore.CPP - C++ and STL the elegant way!<br/>
+One header file (available at source/underscore.h)<br/>
 <br/>
 <br/>
 Code examples:<br/>
